@@ -3,6 +3,8 @@ import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { getUsers } from "./actions";
 
+const MAX_PAGE_SIZE = 50;
+
 export default async function UsersPage({
   searchParams,
 }: {
@@ -10,7 +12,8 @@ export default async function UsersPage({
 }) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const pageSize = Number(params.pageSize) || 10;
+  const requestedPageSize = Number(params.pageSize) || 10;
+  const pageSize = Math.min(Math.max(1, requestedPageSize), MAX_PAGE_SIZE);
   const result = await getUsers(page, pageSize);
 
   if ("error" in result) {

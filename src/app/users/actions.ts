@@ -3,35 +3,60 @@
 import { db } from "@/database/db";
 import { users } from "@/database/schema";
 import * as z from "zod";
-import { SqliteError } from "better-sqlite3";
 import { sql, eq } from "drizzle-orm";
+import { SqliteError } from "better-sqlite3";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   email: z.string().trim().email("Please enter a valid email address"),
 });
 
+const MAX_PAGE_SIZE = 50;
+
 export async function createUser(formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
 
-  if (!name || !email) {
-    return { error: "Name and email are required" };
+  const result = formSchema.safeParse({ name, email });
+
+  if (!result.success) {
+    return {
+      error: result.error.errors[0].message,
+    };
   }
 
   try {
-    await db.insert(users).values({ name, email });
+    await db.insert(users).values({
+      name: result.data.name,
+      email: result.data.email,
+    });
     return { success: true };
   } catch (error) {
-    console.error("Error creating user:", error);
-    return { error: "Failed to create user" };
+    if (
+      error instanceof SqliteError &&
+      error.code === "SQLITE_CONSTRAINT_UNIQUE"
+    ) {
+      return {
+        error: "This email address is already registered",
+      };
+    }
+    return {
+      error: "Failed to create user. Please try again.",
+    };
   }
 }
 
 export async function getUsers(page: number = 1, pageSize: number = 10) {
   try {
-    const offset = (page - 1) * pageSize;
-    const data = await db.select().from(users).limit(pageSize).offset(offset);
+    // Validate and clamp page size
+    const validatedPageSize = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
+    const offset = (page - 1) * validatedPageSize;
+
+    const data = await db
+      .select()
+      .from(users)
+      .limit(validatedPageSize)
+      .offset(offset);
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users);
@@ -39,7 +64,7 @@ export async function getUsers(page: number = 1, pageSize: number = 10) {
     return {
       data,
       total: count,
-      pageCount: Math.ceil(count / pageSize),
+      pageCount: Math.ceil(count / validatedPageSize),
     };
   } catch (error) {
     console.error("Error fetching users:", error);
