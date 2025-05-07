@@ -155,7 +155,7 @@ export function Paginator({
             <SelectValue placeholder={pageSize} />
           </SelectTrigger>
           <SelectContent side="top">
-            {[10, 20, 50].map((size) => (
+            {[5, 10, 20, 50].map((size) => (
               <SelectItem key={size} value={size.toString()}>
                 {size}
               </SelectItem>

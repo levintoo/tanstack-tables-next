@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/database/db";
-import { users } from "@/database/schema";
+import { users, roles } from "@/database/schema";
 import * as z from "zod";
 import { sql, eq } from "drizzle-orm";
 import { SqliteError } from "better-sqlite3";
@@ -16,6 +16,7 @@ const MAX_PAGE_SIZE = 50;
 export async function createUser(formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
+  const roleId = formData.get("roleId") as string;
 
   const result = formSchema.safeParse({ name, email });
 
@@ -29,6 +30,7 @@ export async function createUser(formData: FormData) {
     await db.insert(users).values({
       name: result.data.name,
       email: result.data.email,
+      roleId: roleId ? parseInt(roleId) : null,
     });
     return { success: true };
   } catch (error) {
@@ -53,10 +55,20 @@ export async function getUsers(page: number = 1, pageSize: number = 10) {
     const offset = (page - 1) * validatedPageSize;
 
     const data = await db
-      .select()
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        roleId: users.roleId,
+        roleName: sql<string>`COALESCE(${roles.name}, 'No Role')`.as(
+          "roleName"
+        ),
+      })
       .from(users)
+      .leftJoin(roles, eq(users.roleId, roles.id))
       .limit(validatedPageSize)
       .offset(offset);
+
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users);
@@ -79,5 +91,15 @@ export async function deleteUser(id: number) {
   } catch (error) {
     console.error("Error deleting user:", error);
     return { error: "Failed to delete user" };
+  }
+}
+
+export async function getRoles() {
+  try {
+    const rolesList = await db.select().from(roles);
+    return { data: rolesList };
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    return { error: "Failed to fetch roles" };
   }
 }

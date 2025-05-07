@@ -16,7 +16,8 @@
     "db:check": "npx drizzle-kit check",
     "db:up": "npx drizzle-kit up",
     "db:studio": "npx drizzle-kit studio",
-    "make:table": "ts-node scripts/make-table.ts"
+    "make:table": "ts-node scripts/make-table.ts",
+    "seed:users": "ts-node scripts/seed-users.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@faker-js/faker": "^9.7.0",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",

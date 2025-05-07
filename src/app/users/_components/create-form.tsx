@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { createUser } from "../actions";
+import { createUser, getRoles } from "../actions";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,7 +15,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState, useEffect } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Dialog,
@@ -39,18 +46,36 @@ import {
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   email: z.string().trim().email("Please enter a valid email address"),
+  roleId: z.string().optional(),
 });
+
+type Role = {
+  id: number;
+  name: string;
+};
 
 export function CreateUserForm() {
   const [open, setOpen] = React.useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  useEffect(() => {
+    async function fetchRoles() {
+      const result = await getRoles();
+      if ("data" in result && result.data) {
+        setRoles(result.data);
+      }
+    }
+    fetchRoles();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
+      roleId: undefined,
     },
   });
 
@@ -59,6 +84,9 @@ export function CreateUserForm() {
     const formData = new FormData();
     formData.append("name", values.name);
     formData.append("email", values.email);
+    if (values.roleId) {
+      formData.append("roleId", values.roleId);
+    }
 
     const result = await createUser(formData);
 
@@ -83,7 +111,12 @@ export function CreateUserForm() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter name" {...field} />
+                <Input
+                  type="text"
+                  placeholder="Enter name"
+                  {...field}
+                  autoComplete="name"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,7 +140,33 @@ export function CreateUserForm() {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">Add User</Button>
+        <FormField
+          control={form.control}
+          name="roleId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Role</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id.toString()}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button className="w-full" type="submit">
+          Add User
+        </Button>
       </form>
     </Form>
   );
