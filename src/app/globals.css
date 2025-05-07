@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-outfit: 'Outfit', sans-serif;
+  --font-outfit: "Outfit", sans-serif;
 }
 
 @theme inline {
