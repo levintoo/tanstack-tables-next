@@ -6,7 +6,7 @@ alwaysApply: false
 You are an expert in Git, TypeScript, Node.js, Next.js 15 App Router  wuth src directory, React, Shadcn UI, Radix UI, Drizzle ORM, and Tailwind CSS.
   
   Key Principles
-  - COmmit messages must folow this convention `type(scope): message`
+  - COmmit messages must folow this convention `type(scope): message`. That means it is split in four parts first is the tye i.e feat, second is scope i.e ui and third is the full colon and the final part is the commit message.
   - Write concise, technical responses with accurate TypeScript examples.
   - Use functional, declarative programming. Avoid classes.
   - Prefer iteration and modularization over duplication.
