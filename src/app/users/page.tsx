@@ -8,8 +8,9 @@ export default async function UsersPage({
 }: {
   searchParams: { page?: string; pageSize?: string };
 }) {
-  const page = Number(searchParams.page) || 1;
-  const pageSize = Number(searchParams.pageSize) || 10;
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const pageSize = Number(params.pageSize) || 10;
   const result = await getUsers(page, pageSize);
 
   if ("error" in result) {
