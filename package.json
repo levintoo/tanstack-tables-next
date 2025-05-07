@@ -15,7 +15,8 @@
     "db:pull": "npx drizzle-kit pull",
     "db:check": "npx drizzle-kit check",
     "db:up": "npx drizzle-kit up",
-    "db:studio": "npx drizzle-kit studio"
+    "db:studio": "npx drizzle-kit studio",
+    "make:table": "ts-node scripts/make-table.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
