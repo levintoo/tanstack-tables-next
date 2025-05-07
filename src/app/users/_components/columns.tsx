@@ -1,4 +1,8 @@
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
+import { RoleBadge } from "./role-badge";
+import { ActionsCell } from "./actions-cell";
 
 export type User = {
   id: number;
@@ -24,5 +28,11 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "roleName",
     header: "Role",
+    cell: ({ row }) => <RoleBadge roleName={row.original.roleName} />,
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => <ActionsCell userId={row.original.id} />,
   },
 ];
