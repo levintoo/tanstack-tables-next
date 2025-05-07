@@ -28,6 +28,7 @@ export default async function UsersPage({
         pageCount={result.pageCount}
         currentPage={page}
         total={result.total}
+        pageSize={pageSize}
       />
     </div>
   );
