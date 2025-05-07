@@ -20,6 +20,7 @@ export default async function UsersPage({
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+        <CreateUserForm />
       </div>
 
       <DataTable
@@ -28,13 +29,6 @@ export default async function UsersPage({
         pageCount={result.pageCount}
         currentPage={currentPage}
       />
-
-      <div className="mt-8">
-        <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-4">Add New User</h2>
-          <CreateUserForm />
-        </div>
-      </div>
     </div>
   );
 }
