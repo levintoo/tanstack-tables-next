@@ -1,52 +1,39 @@
-import { db } from "@/database/db";
-import { users } from "@/database/schema";
-import { CreateUserForm } from "./create-form";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { CreateUserForm } from "./_components/create-form";
+import { DataTable } from "./_components/data-table";
+import { columns } from "./_components/columns";
+import { getUsers } from "./actions";
 
-export default async function UsersPage() {
-  const allUsers = await db.select().from(users);
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const params = await searchParams;
+  const currentPage = Number(params.page) || 1;
+  const result = await getUsers(currentPage);
+
+  if ("error" in result) {
+    return <div>Error: {result.error}</div>;
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-24">
-      <h1 className="text-4xl font-bold mb-8">Users</h1>
-      <div className="w-full max-w-4xl">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Id</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-              </TableRow>
-            ))}
-            {allUsers.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-center text-muted-foreground"
-                >
-                  No users found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+    <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+      </div>
 
-        <CreateUserForm />
+      <DataTable
+        columns={columns}
+        data={result.data}
+        pageCount={result.pageCount}
+        currentPage={currentPage}
+      />
+
+      <div className="mt-8">
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-4">Add New User</h2>
+          <CreateUserForm />
+        </div>
       </div>
     </div>
   );
